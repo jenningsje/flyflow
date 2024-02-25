@@ -43,7 +43,7 @@ Flyflow can also act as security middleware, preventing sensitive information fr
 
 We provide easy to configure plugins that allow you to filter PII from your queries, and advanced observability tools that help you understand how LLMs are being used by your organization.
 
-# Configurability
+## Configurability
 
 Flyflow is designed to be extremely configurable. Want to just use us as security middleware, but run all of your inference through GPT4? We got you. Want to fine tune and back up you backend with 5 inference providers for the highest possible rate limits and tokens / second? No problem. 
 
