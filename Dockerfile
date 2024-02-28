@@ -16,9 +16,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o /flyflow ./cmd/main.go
-
-RUN ls -la ./cmd
+RUN go build -o ./flyflow ./cmd/main.go
 
 # Use a Docker multi-stage build to create a lean production image.
 # https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
