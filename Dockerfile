@@ -18,15 +18,7 @@ COPY . .
 # Build the Go app
 RUN go build -o ./flyflow ./cmd/main.go
 
-# Use a Docker multi-stage build to create a lean production image.
-# https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
-FROM alpine:3
-RUN apk add --no-cache ca-certificates
-
-# Copy the binary to the production image from the builder stage.
-COPY --from=builder /app/flyflow /flyflow
-
 EXPOSE 8080
 
 # Run the web service on container startup.
-CMD ["/flyflow"]
+CMD ["./flyflow"]
