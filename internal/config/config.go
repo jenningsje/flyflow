@@ -9,6 +9,7 @@ type Config struct {
 }
 
 func NewConfig() *Config {
+	Init()
 	return &Config{
 		OpenAIAPIKey: GetAPIKey(),
 	}
@@ -19,12 +20,6 @@ func Init() {
 
 	// Set default values
 	viper.SetDefault("OPENAI_API_KEY", "demo")
-
-	// Read from .env file
-	viper.SetConfigFile(".env")
-	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
-	}
 }
 
 func GetAPIKey() string {
