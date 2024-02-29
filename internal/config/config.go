@@ -28,5 +28,5 @@ func Init() {
 }
 
 func GetAPIKey() string {
-	return viper.GetString("API_KEY")
+	return viper.GetString("OPENAI_API_KEY")
 }
