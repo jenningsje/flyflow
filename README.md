@@ -49,4 +49,11 @@ Flyflow is designed to be extremely configurable. Want to just use us as securit
 
 Written in golang, our backend is designed to maximize for performance, without compromising on flexibility for developers. 
 
+## Installation 
 
+Install cobra: 
+
+```bash 
+go get -u github.com/spf13/cobra@latest
+go install github.com/spf13/cobra-cli@latest
+```
