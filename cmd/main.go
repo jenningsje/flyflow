@@ -16,6 +16,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.NewConfig()
 		db := server.InitDB(cfg, false)
+		logger.InitLogger(cfg.Env)
 
 		repo := repository.NewValidationRepository(
 			repository.NewAuthenticationRepository(
@@ -39,6 +40,7 @@ var autoMigrateCmd = &cobra.Command{
 	Short: "Automatically migrate the database schema",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.NewConfig()
+		logger.InitLogger(cfg.Env)
 		server.InitDB(cfg, true)
 		logger.S.Info("Database migration completed successfully.")
 	},
