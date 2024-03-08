@@ -18,7 +18,17 @@ COPY . .
 # Build the Go app
 RUN go build -o ./flyflow ./cmd/main.go
 
+# Create a new stage for the final image
+FROM debian:stable-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the built binary from the builder stage
+COPY --from=builder /app/flyflow .
+
+# Expose the port on which the server will run
 EXPOSE 8080
 
-# Run the web service on container startup.
-CMD ["./flyflow"]
+# Run database migration and start the server
+CMD ["./flyflow", "db", "automigrate", "&&", "./flyflow"]
