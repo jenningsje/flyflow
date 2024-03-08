@@ -14,7 +14,10 @@ var rootCmd = &cobra.Command{
 	Use:   "flyflow",
 	Short: "FlyFlow is LLM middleware",
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg := config.NewConfig()
+		cfg, err := config.NewConfig()
+		if err != nil {
+			log.Printf("error loading config: %v", err)
+		}
 		db := server.InitDB(cfg, false)
 		logger.InitLogger(cfg.Env)
 
@@ -39,15 +42,21 @@ var autoMigrateCmd = &cobra.Command{
 	Use:   "automigrate",
 	Short: "Automatically migrate the database schema",
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg := config.NewConfig()
-		logger.InitLogger(cfg.Env)
+		cfg, err := config.NewConfig()
+		if err != nil {
+			log.Printf("error loading config: %v", err)
+		}
+
 		server.InitDB(cfg, true)
 		logger.S.Info("Database migration completed successfully.")
 	},
 }
 
 func init() {
-	cfg := config.NewConfig()
+	cfg, err := config.NewConfig()
+	if err != nil {
+		log.Printf("error loading config: %v", err)
+	}
 	logger.InitLogger(cfg.Env)
 
 	dbCmd.AddCommand(autoMigrateCmd)
