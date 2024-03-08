@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"github.com/flyflow-devs/flyflow/internal/config"
+	"github.com/flyflow-devs/flyflow/internal/logger"
 	"github.com/flyflow-devs/flyflow/internal/requests"
 	"net/http"
 	"strings"
@@ -83,6 +84,7 @@ func (s *Server) handleCompletion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := s.Repo.ChatCompletion(cr); err != nil {
+		logger.S.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -106,6 +106,31 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) error {
 	r.W.WriteHeader(resp.StatusCode)
 
 	// Copy the response body to the response writer
-	_, err = io.Copy(r.W, resp.Body)
-	return err
+	// Create a buffer to store the response data
+	buffer := make([]byte, 1024)
+
+	// Stream the response body to the response writer
+	for {
+		// Read the response data into the buffer
+		n, err := resp.Body.Read(buffer)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+
+		// Write the data to the response writer
+		_, err = r.W.Write(buffer[:n])
+		if err != nil {
+			return err
+		}
+
+		// Flush the response writer if it implements the http.Flusher interface
+		if flusher, ok := r.W.(http.Flusher); ok {
+			flusher.Flush()
+		}
+	}
+
+	return nil
 }

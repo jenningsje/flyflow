@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/flyflow-devs/flyflow/internal/logger"
 	"github.com/spf13/viper"
 )
 
@@ -16,6 +17,20 @@ type Config struct {
 }
 
 func NewConfig() *Config {
+	// Look for a .env file
+	viper.SetConfigFile(".env")
+
+	// Read the configuration from the .env file
+	err := viper.ReadInConfig()
+	if err != nil {
+		// If the .env file is not found, continue with the default configuration
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			// If the error is not a "file not found" error, log the error
+			logger.S.Error("Error reading config file: ", err)
+		}
+	}
+
+	// Use AutomaticEnv to override configuration with environment variables
 	viper.AutomaticEnv()
 
 	// Set default values
