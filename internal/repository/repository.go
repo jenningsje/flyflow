@@ -1,8 +1,11 @@
 package repository
 
-import "net/http"
+import (
+	"github.com/flyflow-devs/flyflow/internal/requests"
+)
 
 type Repository interface {
-	ProxyRequest(r *http.Request) (*http.Response, error)
+	ProxyRequest(r *requests.ProxyRequest) error
+	ChatCompletion(r *requests.CompletionRequest) error
 }
 

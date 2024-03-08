@@ -3,20 +3,28 @@ package main
 import (
 	"github.com/flyflow-devs/flyflow/internal/config"
 	"github.com/flyflow-devs/flyflow/internal/logger"
+	"github.com/flyflow-devs/flyflow/internal/repository"
 	"github.com/flyflow-devs/flyflow/internal/server"
 	"github.com/spf13/cobra"
 	"log"
 	"net/http"
 )
 
-
-
 var rootCmd = &cobra.Command{
 	Use:   "flyflow",
 	Short: "FlyFlow is LLM middleware",
 	Run: func(cmd *cobra.Command, args []string) {
 		cfg := config.NewConfig()
-		s := server.NewServer(cfg)
+		db := server.InitDB(cfg, false)
+
+		repo := repository.NewValidationRepository(
+			repository.NewAuthenticationRepository(
+				db,
+				repository.NewProxyRepository(cfg),
+			),
+		)
+		s := server.NewServer(cfg, repo)
+		logger.S.Info("Serving on port " + cfg.Port)
 		logger.S.Fatal(http.ListenAndServe(":"+cfg.Port, s.Router))
 	},
 }
