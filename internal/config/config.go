@@ -21,13 +21,6 @@ func NewConfig() (*Config, error) {
 
 	// Read the configuration from the .env file
 	err := viper.ReadInConfig()
-	if err != nil {
-		// If the .env file is not found, continue with the default configuration
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			// If the error is not a "file not found" error, return the error
-			return nil, err
-		}
-	}
 
 	// Use AutomaticEnv to override configuration with environment variables
 	viper.AutomaticEnv()
@@ -52,5 +45,5 @@ func NewConfig() (*Config, error) {
 		DBPass:       viper.GetString("DB_PASS"),
 		DBName:       viper.GetString("DB_NAME"),
 		Env:          viper.GetString("ENV"),
-	}, nil
+	}, err
 }
