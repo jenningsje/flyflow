@@ -2,6 +2,7 @@ package repository
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"github.com/flyflow-devs/flyflow/internal/config"
 	"github.com/flyflow-devs/flyflow/internal/requests"
@@ -11,11 +12,18 @@ import (
 
 type ProxyRepository struct {
 	Config *config.Config
+	Client *http.Client
 }
 
 func NewProxyRepository(Config *config.Config) *ProxyRepository {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+
 	return &ProxyRepository{
 		Config: Config,
+		Client: client,
 	}
 }
 
@@ -44,9 +52,7 @@ func (pr *ProxyRepository) ProxyRequest(r *requests.ProxyRequest) error {
 		newReq.Header.Set("Authorization", "Bearer "+pr.Config.OpenAIAPIKey)
 	}
 
-	// Use a new HTTP client to make the request.
-	client := &http.Client{}
-	resp, err := client.Do(newReq)
+	resp, err := pr.Client.Do(newReq)
 	if err != nil {
 		return err
 	}
@@ -88,8 +94,7 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) error {
 	}
 
 	// Use a new HTTP client to make the request.
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := pr.Client.Do(req)
 	if err != nil {
 		return err
 	}
