@@ -2,7 +2,6 @@ package repository
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"github.com/flyflow-devs/flyflow/internal/config"
 	"github.com/flyflow-devs/flyflow/internal/requests"
@@ -16,10 +15,7 @@ type ProxyRepository struct {
 }
 
 func NewProxyRepository(Config *config.Config) *ProxyRepository {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
+	client := &http.Client{}
 
 	return &ProxyRepository{
 		Config: Config,
@@ -45,14 +41,19 @@ func (pr *ProxyRepository) ProxyRequest(r *requests.ProxyRequest) error {
 	newReq.URL.Host = "api.openai.com"
 	newReq.URL.Scheme = "https"
 
-	// Check if the user provided an OpenAI API key
+	var apiKey string
 	if r.IsOpenAIKey {
-		newReq.Header.Set("Authorization", "Bearer "+r.APIKey)
+		apiKey = r.APIKey
 	} else {
-		newReq.Header.Set("Authorization", "Bearer "+pr.Config.OpenAIAPIKey)
+		apiKey = pr.Config.OpenAIAPIKey
 	}
 
-	resp, err := pr.Client.Do(newReq)
+	// Set the Authorization header with the API key.
+	newReq.Header.Set("Authorization", "Bearer "+apiKey)
+
+	// Use a new HTTP client to make the request.
+	client := &http.Client{}
+	resp, err := client.Do(newReq)
 	if err != nil {
 		return err
 	}
@@ -80,10 +81,13 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) error {
 	}
 
 	// Create a new HTTP request with the JSON data
-	req, err := http.NewRequest("POST", "https://api.openai.com/v1/chat/completions", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest(r.R.Method, r.R.URL.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}
+
+	req.URL.Host = "api.openai.com"
+	req.URL.Scheme = "https"
 
 	// Set the content type and authorization headers
 	req.Header.Set("Content-Type", "application/json")
