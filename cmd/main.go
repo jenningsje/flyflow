@@ -5,6 +5,7 @@ import (
 	"github.com/flyflow-devs/flyflow/internal/logger"
 	"github.com/flyflow-devs/flyflow/internal/repository"
 	"github.com/flyflow-devs/flyflow/internal/server"
+	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 	"log"
 	"net/http"
@@ -49,6 +50,17 @@ var autoMigrateCmd = &cobra.Command{
 
 		server.InitDB(cfg, true)
 		logger.S.Info("Database migration completed successfully.")
+
+		r := mux.NewRouter()
+
+		// Add a health check endpoint
+		r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("OK"))
+		})
+
+		logger.S.Info("Serving on port " + cfg.Port)
+		logger.S.Fatal(http.ListenAndServe(":"+cfg.Port, r))
 	},
 }
 
