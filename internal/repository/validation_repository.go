@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-type ValidationRepository struct{
+type ValidationRepository struct {
 	repo Repository
 }
 
@@ -24,7 +24,7 @@ func (vr *ValidationRepository) ProxyRequest(r *requests.ProxyRequest) error {
 	return vr.repo.ProxyRequest(r)
 }
 
-func (vr *ValidationRepository) ChatCompletion(r *requests.CompletionRequest) error {
+func (vr *ValidationRepository) ChatCompletion(r *requests.CompletionRequest) (*requests.CompletionResponse, error) {
 	if match, _ := regexp.MatchString(`^sk-[a-zA-Z0-9]{48}$`, r.APIKey); match {
 		r.IsOpenAIKey = true
 	} else {

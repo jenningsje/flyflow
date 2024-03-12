@@ -10,7 +10,9 @@ type CompletionRequest struct {
 	IsOpenAIKey bool
 }
 
-type CompletionResponse struct {}
+type CompletionResponse struct {
+	Response string
+}
 
 
 type OpenAICompletionRequest struct {

@@ -6,6 +6,5 @@ import (
 
 type Repository interface {
 	ProxyRequest(r *requests.ProxyRequest) error
-	ChatCompletion(r *requests.CompletionRequest) error
+	ChatCompletion(r *requests.CompletionRequest) (*requests.CompletionResponse, error)
 }
-

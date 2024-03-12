@@ -7,6 +7,7 @@ import (
 	"github.com/flyflow-devs/flyflow/internal/requests"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type ProxyRepository struct {
@@ -74,16 +75,16 @@ func (pr *ProxyRepository) ProxyRequest(r *requests.ProxyRequest) error {
 	return err
 }
 
-func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) error {
+func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*requests.CompletionResponse, error) {
 	jsonData, err := json.Marshal(r.Cr)
 	if err != nil {
-		return err
+		return &requests.CompletionResponse{}, err
 	}
 
 	// Create a new HTTP request with the JSON data
 	req, err := http.NewRequest(r.R.Method, r.R.URL.String(), bytes.NewBuffer(jsonData))
 	if err != nil {
-		return err
+		return &requests.CompletionResponse{}, err
 	}
 
 	req.URL.Host = "api.openai.com"
@@ -100,7 +101,7 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) error {
 	// Use a new HTTP client to make the request.
 	resp, err := pr.Client.Do(req)
 	if err != nil {
-		return err
+		return &requests.CompletionResponse{}, err
 	}
 	defer resp.Body.Close()
 
@@ -119,6 +120,7 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) error {
 	buffer := make([]byte, 1024)
 
 	// Stream the response body to the response writer
+	var responseBuilder strings.Builder
 	for {
 		// Read the response data into the buffer
 		n, err := resp.Body.Read(buffer)
@@ -126,14 +128,17 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) error {
 			if err == io.EOF {
 				break
 			}
-			return err
+			return nil, err
 		}
 
 		// Write the data to the response writer
 		_, err = r.W.Write(buffer[:n])
 		if err != nil {
-			return err
+			return nil, err
 		}
+
+		// Append the response data to the responseBuilder
+		responseBuilder.Write(buffer[:n])
 
 		// Flush the response writer if it implements the http.Flusher interface
 		if flusher, ok := r.W.(http.Flusher); ok {
@@ -141,5 +146,7 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) error {
 		}
 	}
 
-	return nil
+	return &requests.CompletionResponse{
+		Response: responseBuilder.String(),
+	}, nil
 }

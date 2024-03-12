@@ -18,7 +18,7 @@ type AuthenticationRepository struct {
 
 func NewAuthenticationRepository(db *gorm.DB, r Repository) *AuthenticationRepository {
 	repo := &AuthenticationRepository{
-		DB: db,
+		DB:   db,
 		repo: r,
 	}
 	go repo.startAPIKeyCacheUpdater(5 * time.Second)
@@ -42,7 +42,7 @@ func (ar *AuthenticationRepository) ProxyRequest(r *requests.ProxyRequest) error
 	return ar.repo.ProxyRequest(r)
 }
 
-func (ar *AuthenticationRepository) ChatCompletion(r *requests.CompletionRequest) error {
+func (ar *AuthenticationRepository) ChatCompletion(r *requests.CompletionRequest) (*requests.CompletionResponse, error) {
 	if r.IsOpenAIKey {
 		return ar.repo.ChatCompletion(r)
 	}
@@ -67,7 +67,7 @@ func (ar *AuthenticationRepository) updateAPIKeyCache() {
 	var apiKeys []models.APIKey
 	result := ar.DB.Find(&apiKeys)
 	if result.Error != nil {
-		logger.S.Error("failed to updateAPIKeyCache ", result.Error )
+		logger.S.Error("failed to updateAPIKeyCache ", result.Error)
 	}
 
 	newCache := sync.Map{}

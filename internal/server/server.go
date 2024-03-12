@@ -83,7 +83,7 @@ func (s *Server) handleCompletion(w http.ResponseWriter, r *http.Request) {
 		APIKey: apiKey,
 	}
 
-	if err := s.Repo.ChatCompletion(cr); err != nil {
+	if _, err := s.Repo.ChatCompletion(cr); err != nil {
 		logger.S.Error(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
