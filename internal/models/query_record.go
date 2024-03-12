@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type QueryRecord struct {
 	gorm.Model
-	UserID       uint
+	APIKey       string `gorm:"index"`
 	Request      string
 	Response     string
 	RequestedModel        string

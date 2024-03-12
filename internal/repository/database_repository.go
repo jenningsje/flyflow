@@ -29,12 +29,12 @@ func (dr *DatabaseRepository) SaveQueryRecord(req *requests.CompletionRequest, r
 	}
 
 	queryRecord := &models.QueryRecord{
-		UserID:         0, // Set the appropriate user ID
 		Request:        string(jsonData),
 		Response:       resp.Response,
 		RequestedModel: req.Cr.Model,
 		MaxTokens:      req.Cr.MaxTokens,
 		Stream:         req.Cr.Stream,
+		APIKey:         req.APIKey,
 	}
 
 	return dr.DB.Create(queryRecord).Error
