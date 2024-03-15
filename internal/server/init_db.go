@@ -23,6 +23,7 @@ func InitDB(cfg *config.Config, automigrate bool) *gorm.DB {
 			&models.APIKey{},
 			&models.User{},
 			&models.QueryRecord{},
+			&models.Model{},
 		); err != nil {
 			logger.S.Fatal("failed to migrate db", err)
 		}
