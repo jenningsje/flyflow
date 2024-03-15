@@ -25,8 +25,10 @@ var rootCmd = &cobra.Command{
 		repo := repository.NewValidationRepository(
 			repository.NewAuthenticationRepository(
 				db,
-				repository.NewDatabaseRepository(db,
-					repository.NewProxyRepository(cfg),
+				repository.NewModelRepository(db,
+					repository.NewDatabaseRepository(db,
+						repository.NewProxyRepository(cfg),
+					),
 				),
 			),
 		)

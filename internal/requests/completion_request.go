@@ -1,6 +1,9 @@
 package requests
 
-import "net/http"
+import (
+	"github.com/flyflow-devs/flyflow/internal/models"
+	"net/http"
+)
 
 type CompletionRequest struct {
 	R *http.Request
@@ -8,6 +11,7 @@ type CompletionRequest struct {
 	Cr OpenAICompletionRequest
 	APIKey string
 	IsOpenAIKey bool
+	Model *models.Model
 }
 
 type CompletionResponse struct {

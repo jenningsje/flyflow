@@ -87,7 +87,7 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*reque
 		return &requests.CompletionResponse{}, err
 	}
 
-	req.URL.Host = "api.openai.com"
+	req.URL.Host = r.Model.APIUrl
 	req.URL.Scheme = "https"
 
 	// Set the content type and authorization headers
@@ -95,7 +95,7 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*reque
 	if r.IsOpenAIKey {
 		req.Header.Set("Authorization", "Bearer "+r.APIKey)
 	} else {
-		req.Header.Set("Authorization", "Bearer "+pr.Config.OpenAIAPIKey)
+		req.Header.Set("Authorization", "Bearer "+r.Model.APIKey)
 	}
 
 	// Use a new HTTP client to make the request.
