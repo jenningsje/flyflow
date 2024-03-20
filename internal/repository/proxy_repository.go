@@ -82,13 +82,24 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*reque
 	}
 
 	// Create a new HTTP request with the JSON data
-	req, err := http.NewRequest(r.R.Method, r.R.URL.String(), bytes.NewBuffer(jsonData))
-	if err != nil {
-		return &requests.CompletionResponse{}, err
+	var req *http.Request
+	if r.Model.Format == "groq" {
+		req, err = http.NewRequest(r.R.Method, "openai/v1/chat/completions", bytes.NewBuffer(jsonData))
+		if err != nil {
+			return &requests.CompletionResponse{}, err
+		}
+	} else {
+		req, err = http.NewRequest(r.R.Method, r.R.URL.String(), bytes.NewBuffer(jsonData))
+		if err != nil {
+			return &requests.CompletionResponse{}, err
+		}
 	}
+
 
 	req.URL.Host = r.Model.APIUrl
 	req.URL.Scheme = "https"
+
+
 
 	// Set the content type and authorization headers
 	req.Header.Set("Content-Type", "application/json")
