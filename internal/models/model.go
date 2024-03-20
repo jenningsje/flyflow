@@ -9,4 +9,5 @@ type Model struct {
 	InternalModelName string
 	APIUrl string
 	APIKey string
+	Format string
 }
