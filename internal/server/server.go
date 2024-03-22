@@ -57,7 +57,7 @@ func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCompletion(w http.ResponseWriter, r *http.Request) {
-	var req requests.OpenAICompletionRequest
+	var req requests.InternalOpenAICompletionRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

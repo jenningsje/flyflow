@@ -8,7 +8,7 @@ import (
 type CompletionRequest struct {
 	R *http.Request
 	W http.ResponseWriter
-	Cr OpenAICompletionRequest
+	Cr InternalOpenAICompletionRequest
 	APIKey string
 	IsOpenAIKey bool
 	Model *models.Model
@@ -16,7 +16,9 @@ type CompletionRequest struct {
 
 type CompletionResponse struct {
 	Response string
+	ShouldSave bool
 }
+
 
 
 type OpenAICompletionRequest struct {
@@ -28,6 +30,32 @@ type OpenAICompletionRequest struct {
 	ToolChoice  string      `json:"tool_choice,omitempty"`
 	LogProbs    bool        `json:"logprobs,omitempty"`
 	TopLogProbs int         `json:"top_logprobs,omitempty"`
+}
+
+type InternalOpenAICompletionRequest struct {
+	Model       string      `json:"model,omitempty"`
+	Messages    []Message   `json:"messages,omitempty"`
+	MaxTokens   int         `json:"max_tokens,omitempty"`
+	Stream      bool        `json:"stream,omitempty"`
+	Tools       []Tool      `json:"tools,omitempty"`
+	ToolChoice  string      `json:"tool_choice,omitempty"`
+	LogProbs    bool        `json:"logprobs,omitempty"`
+	TopLogProbs int         `json:"top_logprobs,omitempty"`
+	Tags        []string    `json:"tags,omitempty"`
+	Background  bool        `json:"background,omitempty"`
+}
+
+func (i InternalOpenAICompletionRequest) ToCompletionRequest() OpenAICompletionRequest {
+	return OpenAICompletionRequest{
+		Model: i.Model,
+		Messages: i.Messages,
+		MaxTokens: i.MaxTokens,
+		Stream: i.Stream,
+		Tools: i.Tools,
+		ToolChoice: i.ToolChoice,
+		LogProbs: i.LogProbs,
+		TopLogProbs: i.TopLogProbs,
+	}
 }
 
 type Message struct {

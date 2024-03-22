@@ -35,6 +35,7 @@ func (dr *DatabaseRepository) SaveQueryRecord(req *requests.CompletionRequest, r
 		MaxTokens:      req.Cr.MaxTokens,
 		Stream:         req.Cr.Stream,
 		APIKey:         req.APIKey,
+		Tags:           req.Cr.Tags,
 	}
 
 	return dr.DB.Create(queryRecord).Error
@@ -50,9 +51,11 @@ func (dr *DatabaseRepository) ChatCompletion(r *requests.CompletionRequest) (*re
 		return nil, err
 	}
 
-	err = dr.SaveQueryRecord(r, resp)
-	if err != nil {
-		return nil, err
+	if resp.ShouldSave {
+		err = dr.SaveQueryRecord(r, resp)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return resp, nil

@@ -27,7 +27,7 @@ var rootCmd = &cobra.Command{
 				db,
 				repository.NewModelRepository(db,
 					repository.NewDatabaseRepository(db,
-						repository.NewProxyRepository(cfg),
+						repository.NewProxyRepository(cfg, db),
 					),
 				),
 			),

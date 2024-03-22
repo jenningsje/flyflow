@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/flyflow-devs/flyflow/internal/config"
+	"github.com/flyflow-devs/flyflow/internal/logger"
+	"github.com/flyflow-devs/flyflow/internal/models"
 	"github.com/flyflow-devs/flyflow/internal/requests"
+	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"strings"
@@ -13,14 +16,16 @@ import (
 type ProxyRepository struct {
 	Config *config.Config
 	Client *http.Client
+	DB     *gorm.DB
 }
 
-func NewProxyRepository(Config *config.Config) *ProxyRepository {
+func NewProxyRepository(Config *config.Config, db *gorm.DB) *ProxyRepository {
 	client := &http.Client{}
 
 	return &ProxyRepository{
 		Config: Config,
 		Client: client,
+		DB: db,
 	}
 }
 
@@ -76,7 +81,7 @@ func (pr *ProxyRepository) ProxyRequest(r *requests.ProxyRequest) error {
 }
 
 func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*requests.CompletionResponse, error) {
-	jsonData, err := json.Marshal(r.Cr)
+	jsonData, err := json.Marshal(r.Cr.ToCompletionRequest())
 	if err != nil {
 		return &requests.CompletionResponse{}, err
 	}
@@ -107,6 +112,12 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*reque
 		req.Header.Set("Authorization", "Bearer "+r.APIKey)
 	} else {
 		req.Header.Set("Authorization", "Bearer "+r.Model.APIKey)
+	}
+
+	// If the request
+	if r.Cr.Background {
+		pr.RunInBackground(r, req)
+		return &requests.CompletionResponse{ShouldSave: false}, nil
 	}
 
 	// Use a new HTTP client to make the request.
@@ -159,5 +170,67 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*reque
 
 	return &requests.CompletionResponse{
 		Response: responseBuilder.String(),
+		ShouldSave: true,
 	}, nil
+}
+
+func (pr *ProxyRepository) RunInBackground(r *requests.CompletionRequest, req *http.Request) {
+	resp, err := pr.Client.Do(req)
+	if err != nil {
+		logger.S.Error("error completing client request", err)
+	}
+	defer resp.Body.Close()
+
+	r.W.Header().Set("Content-Type", "application/json")
+	r.W.WriteHeader(http.StatusOK)
+	r.W.Write([]byte(`{"status": "ok"}`))
+
+	// Flush the response writer if it implements the http.Flusher interface
+	if flusher, ok := r.W.(http.Flusher); ok {
+		flusher.Flush()
+	}
+
+	// Process the response in the background
+	go func() {
+		// Create a buffer to store the response data
+		buffer := make([]byte, 1024)
+
+		var responseBuilder strings.Builder
+		for {
+			// Read the response data into the buffer
+			n, err := resp.Body.Read(buffer)
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				// Handle the error if needed
+				logger.S.Error("error reading response buffer in RunInBackground", err)
+				return
+			}
+
+			// Append the response data to the responseBuilder
+			responseBuilder.Write(buffer[:n])
+		}
+
+
+		jsonData, err := json.Marshal(r.Cr)
+		if err != nil {
+			logger.S.Error("error marshalling Cr in RunInBackground ", err)
+		}
+
+		queryRecord := &models.QueryRecord{
+			Request:        string(jsonData),
+			Response:       responseBuilder.String(),
+			RequestedModel: r.Cr.Model,
+			MaxTokens:      r.Cr.MaxTokens,
+			Stream:         r.Cr.Stream,
+			APIKey:         r.APIKey,
+			Tags:           r.Cr.Tags,
+		}
+
+		err = pr.DB.Create(queryRecord).Error
+		if err != nil {
+			logger.S.Error("error creating query record in RunInBackground ", err)
+		}
+	}()
 }
