@@ -14,5 +14,5 @@ type QueryRecord struct {
 	PresencePenalty float32
 	FrequencyPenalty float32
 	Stream       bool
-	Tags         []string
+	Tags         []string `gorm:"serializer:json"`
 }
