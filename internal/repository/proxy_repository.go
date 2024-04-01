@@ -3,6 +3,7 @@ package repository
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/flyflow-devs/flyflow/internal/config"
 	"github.com/flyflow-devs/flyflow/internal/logger"
 	"github.com/flyflow-devs/flyflow/internal/models"
@@ -241,6 +242,10 @@ func (pr *ProxyRepository) RunInBackground(r *requests.CompletionRequest, req *h
 
 func (pr *ProxyRepository) ProxyClaude(r *requests.CompletionRequest) (*requests.CompletionResponse, error) {
 	req := r.Cr.ToCompletionRequest().ToClaudeRequest()
+
+	if req.MaxTokens == 0 {
+		return &requests.CompletionResponse{}, errors.New("for claude models you must specify max tokens")
+	}
 
 	jsonData, err := json.Marshal(req)
 	if err != nil {

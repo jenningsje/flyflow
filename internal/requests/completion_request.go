@@ -55,9 +55,13 @@ func (oar OpenAICompletionRequest) ToClaudeRequest() ClaudeRequest {
 	// Convert Messages to Claude's format
 	cr.Messages = make([]ClaudeMessage, len(oar.Messages))
 	for i, msg := range oar.Messages {
-		cr.Messages[i] = ClaudeMessage{
-			Role:    msg.Role,
-			Content: msg.Content,
+		if msg.Role == "system" {
+			cr.System = msg.Content.(string)
+		} else {
+			cr.Messages[i] = ClaudeMessage{
+				Role:    msg.Role,
+				Content: msg.Content,
+			}
 		}
 	}
 
