@@ -86,6 +86,10 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*reque
 		return &requests.CompletionResponse{}, err
 	}
 
+	if r.Model.Format == "claude" {
+		return pr.ProxyClaude(r)
+	}
+
 	// Create a new HTTP request with the JSON data
 	var req *http.Request
 	if r.Model.Format == "groq" {
@@ -233,4 +237,77 @@ func (pr *ProxyRepository) RunInBackground(r *requests.CompletionRequest, req *h
 			logger.S.Error("error creating query record in RunInBackground ", err)
 		}
 	}()
+}
+
+func (pr *ProxyRepository) ProxyClaude(r *requests.CompletionRequest) (*requests.CompletionResponse, error) {
+	req := r.Cr.ToCompletionRequest().ToClaudeRequest()
+
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return &requests.CompletionResponse{}, err
+	}
+
+	// Create a new HTTP request with the JSON data
+	httpReq, err := http.NewRequest(r.R.Method, "/v1/messages", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return &requests.CompletionResponse{}, err
+	}
+
+	httpReq.URL.Host = r.Model.APIUrl
+	httpReq.URL.Scheme = "https"
+
+	// Set the content type and authorization headers
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("anthropic-version", "2023-06-01") // Replace with the appropriate version
+	httpReq.Header.Set("x-api-key", r.Model.APIKey)
+
+	// Use a new HTTP client to make the request.
+	resp, err := pr.Client.Do(httpReq)
+	if err != nil {
+		return &requests.CompletionResponse{}, err
+	}
+	defer resp.Body.Close()
+
+	// Copy the response headers to the response writer
+	for key, values := range resp.Header {
+		for _, value := range values {
+			r.W.Header().Add(key, value)
+		}
+	}
+
+	// Write the response status code
+	r.W.WriteHeader(resp.StatusCode)
+
+	// Read the response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return &requests.CompletionResponse{}, err
+	}
+
+	// Unmarshal the response body into a ClaudeResponse struct
+	var claudeResponse requests.ClaudeResponse
+	err = json.Unmarshal(respBody, &claudeResponse)
+	if err != nil {
+		return &requests.CompletionResponse{}, err
+	}
+
+	// Convert the ClaudeResponse to OpenAIResponse
+	openAIResponse := claudeResponse.ToOpenAIResponse()
+
+	// Marshal the OpenAIResponse to JSON
+	openAIResponseJSON, err := json.Marshal(openAIResponse)
+	if err != nil {
+		return &requests.CompletionResponse{}, err
+	}
+
+	// Write the OpenAI response JSON to the response writer
+	_, err = r.W.Write(openAIResponseJSON)
+	if err != nil {
+		return &requests.CompletionResponse{}, err
+	}
+
+	return &requests.CompletionResponse{
+		Response:   string(openAIResponseJSON),
+		ShouldSave: true,
+	}, nil
 }

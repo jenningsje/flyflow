@@ -19,8 +19,6 @@ type CompletionResponse struct {
 	ShouldSave bool
 }
 
-
-
 type OpenAICompletionRequest struct {
 	Model       string      `json:"model,omitempty"`
 	Messages    []Message   `json:"messages,omitempty"`
@@ -43,6 +41,27 @@ type InternalOpenAICompletionRequest struct {
 	TopLogProbs int         `json:"top_logprobs,omitempty"`
 	Tags        []string    `json:"tags,omitempty"`
 	Background  bool        `json:"background,omitempty"`
+}
+
+func (oar OpenAICompletionRequest) ToClaudeRequest() ClaudeRequest {
+	cr := ClaudeRequest{
+		Model:     oar.Model,
+		MaxTokens: oar.MaxTokens,
+		Metadata: &Metadata{
+			Stream: oar.Stream,
+		},
+	}
+
+	// Convert Messages to Claude's format
+	cr.Messages = make([]ClaudeMessage, len(oar.Messages))
+	for i, msg := range oar.Messages {
+		cr.Messages[i] = ClaudeMessage{
+			Role:    msg.Role,
+			Content: msg.Content,
+		}
+	}
+
+	return cr
 }
 
 func (i InternalOpenAICompletionRequest) ToCompletionRequest() OpenAICompletionRequest {
