@@ -289,8 +289,6 @@ func (pr *ProxyRepository) ProxyClaude(r *requests.CompletionRequest) (*requests
 		return &requests.CompletionResponse{}, err
 	}
 
-	logger.S.Info("body ", string(respBody))
-
 	// Unmarshal the response body into a ClaudeResponse struct
 	var claudeResponse requests.ClaudeResponse
 	err = json.Unmarshal(respBody, &claudeResponse)
@@ -299,7 +297,10 @@ func (pr *ProxyRepository) ProxyClaude(r *requests.CompletionRequest) (*requests
 	}
 
 	// Convert the ClaudeResponse to OpenAIResponse
-	openAIResponse := claudeResponse.ToOpenAIResponse()
+	openAIResponse, err := claudeResponse.ToOpenAIResponse()
+	if err != nil {
+		return &requests.CompletionResponse{}, err
+	}
 
 	// Marshal the OpenAIResponse to JSON
 	openAIResponseJSON, err := json.Marshal(openAIResponse)

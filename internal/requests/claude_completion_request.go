@@ -1,6 +1,9 @@
 package requests
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type ClaudeRequest struct {
 	Model    string          `json:"model"`
@@ -44,8 +47,11 @@ type Usage struct {
 	OutputTokens int `json:"output_tokens"`
 }
 
-func (cr *ClaudeResponse) ToOpenAIResponse() OpenAIResponse {
-	return OpenAIResponse{
+func (cr *ClaudeResponse) ToOpenAIResponse() (*OpenAIResponse, error) {
+	if len(cr.Content) == 0 {
+		return nil, errors.New("internal server error")
+	}
+	return &OpenAIResponse{
 		ID:               cr.ID,
 		Object:           "chat.completion",
 		Created:          time.Now().Unix(),
@@ -67,7 +73,7 @@ func (cr *ClaudeResponse) ToOpenAIResponse() OpenAIResponse {
 			CompletionTokens: cr.Usage.OutputTokens,
 			TotalTokens:      cr.Usage.InputTokens + cr.Usage.OutputTokens,
 		},
-	}
+	}, nil
 }
 
 type OpenAIResponse struct {
