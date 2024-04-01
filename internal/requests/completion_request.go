@@ -53,17 +53,18 @@ func (oar OpenAICompletionRequest) ToClaudeRequest() ClaudeRequest {
 	}
 
 	// Convert Messages to Claude's format
-	cr.Messages = make([]ClaudeMessage, len(oar.Messages))
-	currIndex := 0
+	// Initialize cr.Messages with the correct length
+	cr.Messages = make([]ClaudeMessage, 0, len(oar.Messages))
 	for _, msg := range oar.Messages {
 		if msg.Role == "system" {
+			// Cast msg.Content to string for the system message
 			cr.System = msg.Content.(string)
 		} else {
-			cr.Messages[currIndex] = ClaudeMessage{
+			// Append non-system messages to cr.Messages
+			cr.Messages = append(cr.Messages, ClaudeMessage{
 				Role:    msg.Role,
 				Content: msg.Content,
-			}
-			currIndex++
+			})
 		}
 	}
 
