@@ -289,6 +289,8 @@ func (pr *ProxyRepository) ProxyClaude(r *requests.CompletionRequest) (*requests
 		return &requests.CompletionResponse{}, err
 	}
 
+	logger.S.Info("body ", string(respBody))
+
 	// Unmarshal the response body into a ClaudeResponse struct
 	var claudeResponse requests.ClaudeResponse
 	err = json.Unmarshal(respBody, &claudeResponse)
