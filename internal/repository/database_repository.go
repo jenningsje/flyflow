@@ -5,11 +5,10 @@ import (
 	"github.com/flyflow-devs/flyflow/internal/logger"
 	"github.com/flyflow-devs/flyflow/internal/models"
 	"github.com/flyflow-devs/flyflow/internal/requests"
+	"github.com/pandodao/tokenizer-go"
 	"gorm.io/gorm"
 	"strings"
 	"sync"
-	"github.com/pandodao/tokenizer-go"
-
 )
 
 type DatabaseRepository struct {
@@ -61,7 +60,7 @@ func (dr *DatabaseRepository) SaveQueryRecord(req *requests.CompletionRequest, r
 		// Streaming version
 		// Initialize variables to store the response data
 		var responseBuilder strings.Builder
-		var inputTokens, outputTokens int
+		var outputTokens int
 
 		// Split the response data by newline
 		lines := strings.Split(resp.Response, "\n")
