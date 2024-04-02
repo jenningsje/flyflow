@@ -9,6 +9,8 @@ type QueryRecord struct {
 	Response     string
 	RequestedModel        string
 	MaxTokens    int
+	InputTokens  int
+	OutputTokens int
 	Temperature  float32
 	TopP         float32
 	PresencePenalty float32

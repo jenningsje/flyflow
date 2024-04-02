@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/gorilla/mux v1.8.1
+	github.com/pandodao/tokenizer-go v0.2.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 	go.uber.org/zap v1.21.0
@@ -12,8 +13,13 @@ require (
 )
 
 require (
+	github.com/dlclark/regexp2 v1.11.0 // indirect
+	github.com/dop251/goja v0.0.0-20240220182346-e401ed450204 // indirect
+	github.com/dop251/goja_nodejs v0.0.0-20240221231712-27eeffc9c235 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
+	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/google/pprof v0.0.0-20240402174815-29b9bb013b0f // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
