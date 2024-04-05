@@ -32,7 +32,7 @@ var rootCmd = &cobra.Command{
 				),
 			),
 		)
-		s := server.NewServer(cfg, repo)
+		s := server.NewServer(cfg, db, repo)
 		logger.S.Info("Serving on port " + cfg.Port)
 		logger.S.Fatal(http.ListenAndServe(":"+cfg.Port, s.Router))
 	},
