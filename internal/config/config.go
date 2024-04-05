@@ -13,6 +13,7 @@ type Config struct {
 	DBPass       string
 	DBName       string
 	Env          string
+	JWTSecret    string
 }
 
 func NewConfig() (*Config, error) {
@@ -34,6 +35,7 @@ func NewConfig() (*Config, error) {
 	viper.SetDefault("DB_PASS", "password")
 	viper.SetDefault("DB_NAME", "flyflow")
 	viper.SetDefault("ENV", "local")
+	viper.SetDefault("JWT_SECRET", "secret")
 
 	// Return the config
 	return &Config{
@@ -45,5 +47,6 @@ func NewConfig() (*Config, error) {
 		DBPass:       viper.GetString("DB_PASS"),
 		DBName:       viper.GetString("DB_NAME"),
 		Env:          viper.GetString("ENV"),
+		JWTSecret:    viper.GetString("JWT_SECRET"),
 	}, err
 }
