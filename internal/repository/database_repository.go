@@ -110,6 +110,7 @@ func (dr *DatabaseRepository) SaveQueryRecord(req *requests.CompletionRequest, r
 			Stream:         req.Cr.Stream,
 			APIKey:         req.APIKey,
 			Tags:           req.Cr.Tags,
+			RequestTimeSeconds: resp.RequestTimeSeconds,
 		}
 
 		return dr.DB.Create(queryRecord).Error

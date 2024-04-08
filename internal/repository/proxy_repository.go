@@ -106,10 +106,8 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*reque
 		}
 	}
 
-
 	req.URL.Host = r.Model.APIUrl
 	req.URL.Scheme = "https"
-
 
 
 	// Set the content type and authorization headers
