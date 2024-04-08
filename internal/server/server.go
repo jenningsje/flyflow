@@ -44,11 +44,24 @@ func (s *Server) routes() {
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}), // Allow specific HTTP methods
 		handlers.AllowedHeaders([]string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"}), // Allow specific headers
 	)
-	// Wrap the webapp routes with the CORS handler
+
+	// Public routes
 	s.Router.HandleFunc("/webapp/signup", webAppHandler.SignUp).Methods(http.MethodPost, http.MethodOptions)
 	s.Router.HandleFunc("/webapp/login", webAppHandler.Login).Methods(http.MethodPost, http.MethodOptions)
 	s.Router.HandleFunc("/webapp/authcheck", webAppHandler.AuthCheck).Methods(http.MethodGet, http.MethodOptions)
 
+	// API key routes with AuthMiddleware
+	apiKeysRouter := s.Router.PathPrefix("/webapp/api-keys").Subrouter()
+	apiKeysRouter.Use(webapp.AuthMiddleware(s.Cfg))
+	apiKeysRouter.HandleFunc("/create", webAppHandler.CreateAPIKey).Methods(http.MethodPost)
+	apiKeysRouter.HandleFunc("/list", webAppHandler.ListAPIKeys).Methods(http.MethodGet)
+	apiKeysRouter.HandleFunc("/delete", webAppHandler.DeleteAPIKey).Methods(http.MethodDelete)
+
+	// Query records routes with AuthMiddleware
+	queryRecordsRouter := s.Router.PathPrefix("/webapp/query-records").Subrouter()
+	queryRecordsRouter.Use(webapp.AuthMiddleware(s.Cfg))
+	queryRecordsRouter.HandleFunc("/tokens-per-second", webAppHandler.GetTokensPerSecondTimeSeries).Methods(http.MethodGet)
+	queryRecordsRouter.HandleFunc("/list", webAppHandler.GetQueryRecords).Methods(http.MethodGet)
 
 	s.Router.PathPrefix("/").HandlerFunc(s.handleRequest)
 	// Wrap the router with the CORS handler

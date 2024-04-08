@@ -46,13 +46,14 @@ func (dr *DatabaseRepository) SaveQueryRecord(req *requests.CompletionRequest, r
 		queryRecord := &models.QueryRecord{
 			Request:         string(jsonData),
 			Response:        responseText,
-			RequestedModel:  req.Cr.Model,
+			RequestedModel:  req.Model.ModelName,
 			MaxTokens:       req.Cr.MaxTokens,
 			InputTokens:     openAIResp.Usage.PromptTokens,
 			OutputTokens:    openAIResp.Usage.CompletionTokens,
 			Stream:          req.Cr.Stream,
 			APIKey:          req.APIKey,
 			Tags:            req.Cr.Tags,
+			RequestTimeSeconds: resp.RequestTimeSeconds,
 		}
 
 		return dr.DB.Create(queryRecord).Error

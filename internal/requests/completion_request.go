@@ -17,6 +17,7 @@ type CompletionRequest struct {
 type CompletionResponse struct {
 	Response string
 	ShouldSave bool
+	RequestTimeSeconds float32
 }
 
 type OpenAICompletionRequest struct {

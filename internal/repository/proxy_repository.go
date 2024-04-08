@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type ProxyRepository struct {
@@ -125,6 +126,7 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*reque
 		return &requests.CompletionResponse{ShouldSave: false}, nil
 	}
 
+	startTime := time.Now()
 	// Use a new HTTP client to make the request.
 	resp, err := pr.Client.Do(req)
 	if err != nil {
@@ -173,9 +175,12 @@ func (pr *ProxyRepository) ChatCompletion(r *requests.CompletionRequest) (*reque
 		}
 	}
 
+	requestTime := time.Since(startTime).Seconds()
+
 	return &requests.CompletionResponse{
 		Response: responseBuilder.String(),
 		ShouldSave: true,
+		RequestTimeSeconds: float32(requestTime),
 	}, nil
 }
 
