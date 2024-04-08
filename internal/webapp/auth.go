@@ -11,19 +11,19 @@ import (
 	"time"
 )
 
-type AuthHandler struct {
+type WebAppHandler struct {
 	DB *gorm.DB
 	Cfg *config.Config
 }
 
-func NewAuthHandler(db *gorm.DB, cfg *config.Config) *AuthHandler {
-	return &AuthHandler{
+func NewWebAppHandler(db *gorm.DB, cfg *config.Config) *WebAppHandler {
+	return &WebAppHandler{
 		DB: db,
 		Cfg: cfg,
 	}
 }
 
-func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
+func (h *WebAppHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -54,7 +54,7 @@ func (h *AuthHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (h *WebAppHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -85,7 +85,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h *AuthHandler) AuthCheck(w http.ResponseWriter, r *http.Request) {
+func (h *WebAppHandler) AuthCheck(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		http.Error(w, "Missing authorization header", http.StatusUnauthorized)
@@ -106,7 +106,7 @@ func (h *AuthHandler) AuthCheck(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *AuthHandler) generateJWT(email string) (string, error) {
+func (h *WebAppHandler) generateJWT(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": email,
 		"exp":   time.Now().Add(24 * time.Hour).Unix(),

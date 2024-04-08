@@ -36,10 +36,10 @@ func (s *Server) routes() {
 	s.Router.PathPrefix("/v1/chat/completion").HandlerFunc(s.handleCompletion)
 	s.Router.PathPrefix("/").HandlerFunc(s.handleRequest)
 
-	authHandler := webapp.NewAuthHandler(s.DB, s.Cfg)
-	s.Router.HandleFunc("/webapp/signup", authHandler.SignUp).Methods(http.MethodPost)
-	s.Router.HandleFunc("/webapp/login", authHandler.Login).Methods(http.MethodPost)
-	s.Router.HandleFunc("/webapp/authcheck", authHandler.AuthCheck).Methods(http.MethodGet)
+	webAppHandler := webapp.NewWebAppHandler(s.DB, s.Cfg)
+	s.Router.HandleFunc("/webapp/signup", webAppHandler.SignUp).Methods(http.MethodPost)
+	s.Router.HandleFunc("/webapp/login", webAppHandler.Login).Methods(http.MethodPost)
+	s.Router.HandleFunc("/webapp/authcheck", webAppHandler.AuthCheck).Methods(http.MethodGet)
 }
 
 func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
