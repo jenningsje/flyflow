@@ -37,14 +37,14 @@ func (h *WebAppHandler) GetTokensPerSecondTimeSeries(w http.ResponseWriter, r *h
 		return
 	}
 
-	// Calculate tokens per second for each day
+	// Calculate tokens per second for each hour
 	tokensPerSecondData := make(map[string]TokensPerSecondData)
 	for _, record := range queryRecords {
-		date := record.CreatedAt.Format("2006-01-02")
-		data := tokensPerSecondData[date]
-		data.Date = date
+		hour := record.CreatedAt.Format("2006-01-02T15")
+		data := tokensPerSecondData[hour]
+		data.Date = hour
 		data.TokensPerSecond += float64(record.InputTokens+record.OutputTokens) / float64(record.RequestTimeSeconds)
-		tokensPerSecondData[date] = data
+		tokensPerSecondData[hour] = data
 	}
 
 	// Convert map to slice
