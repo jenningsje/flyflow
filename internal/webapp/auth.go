@@ -2,26 +2,12 @@ package webapp
 
 import (
 	"encoding/json"
-	"github.com/flyflow-devs/flyflow/internal/config"
 	"github.com/flyflow-devs/flyflow/internal/models"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 	"net/http"
 	"time"
 )
-
-type WebAppHandler struct {
-	DB *gorm.DB
-	Cfg *config.Config
-}
-
-func NewWebAppHandler(db *gorm.DB, cfg *config.Config) *WebAppHandler {
-	return &WebAppHandler{
-		DB: db,
-		Cfg: cfg,
-	}
-}
 
 func (h *WebAppHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	var user models.User

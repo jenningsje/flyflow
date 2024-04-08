@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
+	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
 	github.com/pandodao/tokenizer-go v0.2.0
 	github.com/spf13/cobra v1.8.0
@@ -18,6 +19,7 @@ require (
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/dop251/goja v0.0.0-20240220182346-e401ed450204 // indirect
 	github.com/dop251/goja_nodejs v0.0.0-20240221231712-27eeffc9c235 // indirect
+	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-sourcemap/sourcemap v2.1.4+incompatible // indirect
 	github.com/google/go-cmp v0.6.0 // indirect

@@ -12,6 +12,8 @@ import (
 
 	"github.com/flyflow-devs/flyflow/internal/repository"
 	"github.com/gorilla/mux"
+
+	"github.com/gorilla/handlers"
 )
 
 type Server struct {
@@ -34,12 +36,23 @@ func NewServer(Config *config.Config, DB *gorm.DB,  repo repository.Repository) 
 
 func (s *Server) routes() {
 	s.Router.PathPrefix("/v1/chat/completion").HandlerFunc(s.handleCompletion)
-	s.Router.PathPrefix("/").HandlerFunc(s.handleRequest)
 
 	webAppHandler := webapp.NewWebAppHandler(s.DB, s.Cfg)
-	s.Router.HandleFunc("/webapp/signup", webAppHandler.SignUp).Methods(http.MethodPost)
-	s.Router.HandleFunc("/webapp/login", webAppHandler.Login).Methods(http.MethodPost)
-	s.Router.HandleFunc("/webapp/authcheck", webAppHandler.AuthCheck).Methods(http.MethodGet)
+	// Create a new CORS handler
+	corsHandler := handlers.CORS(
+		handlers.AllowedOrigins([]string{"*"}), // Allow specific origin
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}), // Allow specific HTTP methods
+		handlers.AllowedHeaders([]string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"}), // Allow specific headers
+	)
+	// Wrap the webapp routes with the CORS handler
+	s.Router.HandleFunc("/webapp/signup", webAppHandler.SignUp).Methods(http.MethodPost, http.MethodOptions)
+	s.Router.HandleFunc("/webapp/login", webAppHandler.Login).Methods(http.MethodPost, http.MethodOptions)
+	s.Router.HandleFunc("/webapp/authcheck", webAppHandler.AuthCheck).Methods(http.MethodGet, http.MethodOptions)
+
+
+	s.Router.PathPrefix("/").HandlerFunc(s.handleRequest)
+	// Wrap the router with the CORS handler
+	s.Router.Use(corsHandler)
 }
 
 func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
