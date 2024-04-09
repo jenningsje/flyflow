@@ -1,10 +1,8 @@
 package models
 
-import "gorm.io/gorm"
-
 type APIKey struct {
-	gorm.Model
-	UserId uint `gorm:"index"`
-	Name string
-	Key string `gorm:"uniqueIndex"`
+	BaseModel
+	UserId uint   `json:"user_id" gorm:"index"`
+	Name   string `json:"name"`
+	Key    string `json:"key" gorm:"uniqueIndex"`
 }

@@ -35,8 +35,7 @@ func (h *WebAppHandler) CreateAPIKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := map[string]string{"api_key": apiKey.Key}
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(apiKey)
 }
 
 func (h *WebAppHandler) ListAPIKeys(w http.ResponseWriter, r *http.Request) {
