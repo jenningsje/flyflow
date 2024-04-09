@@ -103,7 +103,7 @@ func (dr *DatabaseRepository) SaveQueryRecord(req *requests.CompletionRequest, r
 		queryRecord := &models.QueryRecord{
 			Request:        string(jsonData),
 			Response:       responseBuilder.String(),
-			RequestedModel: req.Cr.Model,
+			RequestedModel: req.Model.ModelName,
 			MaxTokens:      req.Cr.MaxTokens,
 			InputTokens:    tokenizer.MustCalToken(totalMessage),
 			OutputTokens:   outputTokens,
