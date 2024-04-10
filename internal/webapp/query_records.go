@@ -37,7 +37,7 @@ func (h *WebAppHandler) GetTokensPerSecondTimeSeries(w http.ResponseWriter, r *h
 	lastWeek := time.Now().AddDate(0, 0, -7)
 	var timeSeries []TokensPerSecondData
 	result = h.DB.Table("query_records").
-		Select("to_char(created_at, 'YYYY-MM-DD\"T\"HH24') AS date, AVERAGE((input_tokens + output_tokens) / request_time_seconds) AS tokens_per_second").
+		Select("to_char(created_at, 'YYYY-MM-DD\"T\"HH24') AS date, AVG((input_tokens + output_tokens) / request_time_seconds) AS tokens_per_second").
 		Where("api_key IN (?) AND created_at >= ? AND request_time_seconds > 0", plainAPIKeys, lastWeek).
 		Group("date").
 		Order("date ASC").
