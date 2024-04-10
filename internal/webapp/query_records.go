@@ -72,12 +72,16 @@ func (h *WebAppHandler) GetQueryRecords(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Parse pagination parameters
-	pageStr := r.URL.Query().Get("page")
+	createdAtStr := r.URL.Query().Get("created_at")
 	limitStr := r.URL.Query().Get("limit")
 
-	page, err := strconv.Atoi(pageStr)
-	if err != nil {
-		page = 1 // Default page number
+	var createdAt time.Time
+	if createdAtStr != "" {
+		createdAt, err = time.Parse(time.RFC3339, createdAtStr)
+		if err != nil {
+			http.Error(w, "Invalid created_at value", http.StatusBadRequest)
+			return
+		}
 	}
 
 	limit, err := strconv.Atoi(limitStr)
@@ -87,11 +91,27 @@ func (h *WebAppHandler) GetQueryRecords(w http.ResponseWriter, r *http.Request) 
 
 	// Get the paginated query records
 	var queryRecords []models.QueryRecord
-	result = h.DB.Where("api_key IN (?)", plainAPIKeys).Order("created_at desc").Limit(limit).Offset((page - 1) * limit).Find(&queryRecords)
+	query := h.DB.Where("api_key IN (?)", plainAPIKeys).Order("created_at desc").Limit(limit)
+
+	if !createdAt.IsZero() {
+		query = query.Where("created_at < ?", createdAt)
+	}
+
+	result = query.Find(&queryRecords)
 	if result.Error != nil {
 		http.Error(w, "Failed to retrieve query records", http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(queryRecords)
+	response := struct {
+		Data       []models.QueryRecord `json:"data"`
+		CreatedAt  time.Time            `json:"created_at"`
+		HasMore    bool                 `json:"has_more"`
+	}{
+		Data:      queryRecords,
+		CreatedAt: createdAt,
+		HasMore:   len(queryRecords) == limit,
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
