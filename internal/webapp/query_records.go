@@ -33,29 +33,19 @@ func (h *WebAppHandler) GetTokensPerSecondTimeSeries(w http.ResponseWriter, r *h
 		plainAPIKeys = append(plainAPIKeys, apiKey.Key)
 	}
 
-	// Get the query records for the past week
+	// Get the aggregated query records for the past week
 	lastWeek := time.Now().AddDate(0, 0, -7)
-	var queryRecords []models.QueryRecord
-	result = h.DB.Where("api_key IN (?) AND created_at >= ?", plainAPIKeys, lastWeek).Find(&queryRecords)
+	var timeSeries []TokensPerSecondData
+	result = h.DB.Table("query_records").
+		Select("DATE_FORMAT(created_at, '%Y-%m-%dT%H') AS date, SUM((input_tokens + output_tokens) / request_time_seconds) AS tokens_per_second").
+		Where("api_key IN (?) AND created_at >= ?", plainAPIKeys, lastWeek).
+		Group("date").
+		Order("date DESC").
+		Find(&timeSeries)
+
 	if result.Error != nil {
 		http.Error(w, "Failed to retrieve query records", http.StatusInternalServerError)
 		return
-	}
-
-	// Calculate tokens per second for each hour
-	tokensPerSecondData := make(map[string]TokensPerSecondData)
-	for _, record := range queryRecords {
-		hour := record.CreatedAt.Format("2006-01-02T15")
-		data := tokensPerSecondData[hour]
-		data.Date = hour
-		data.TokensPerSecond += float64(record.InputTokens+record.OutputTokens) / float64(record.RequestTimeSeconds)
-		tokensPerSecondData[hour] = data
-	}
-
-	// Convert map to slice
-	var timeSeries []TokensPerSecondData
-	for _, data := range tokensPerSecondData {
-		timeSeries = append(timeSeries, data)
 	}
 
 	json.NewEncoder(w).Encode(timeSeries)
