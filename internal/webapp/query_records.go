@@ -28,10 +28,15 @@ func (h *WebAppHandler) GetTokensPerSecondTimeSeries(w http.ResponseWriter, r *h
 		return
 	}
 
+	var plainAPIKeys []string
+	for _, apiKey := range apiKeys {
+		plainAPIKeys = append(plainAPIKeys, apiKey.Key)
+	}
+
 	// Get the query records for the past week
 	lastWeek := time.Now().AddDate(0, 0, -7)
 	var queryRecords []models.QueryRecord
-	result = h.DB.Where("api_key IN (?) AND created_at >= ?", apiKeys, lastWeek).Find(&queryRecords)
+	result = h.DB.Where("api_key IN (?) AND created_at >= ?", plainAPIKeys, lastWeek).Find(&queryRecords)
 	if result.Error != nil {
 		http.Error(w, "Failed to retrieve query records", http.StatusInternalServerError)
 		return
@@ -71,6 +76,11 @@ func (h *WebAppHandler) GetQueryRecords(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	var plainAPIKeys []string
+	for _, apiKey := range apiKeys {
+		plainAPIKeys = append(plainAPIKeys, apiKey.Key)
+	}
+
 	// Parse pagination parameters
 	pageStr := r.URL.Query().Get("page")
 	limitStr := r.URL.Query().Get("limit")
@@ -87,7 +97,7 @@ func (h *WebAppHandler) GetQueryRecords(w http.ResponseWriter, r *http.Request) 
 
 	// Get the paginated query records
 	var queryRecords []models.QueryRecord
-	result = h.DB.Where("api_key IN (?)", apiKeys).Order("created_at desc").Limit(limit).Offset((page - 1) * limit).Find(&queryRecords)
+	result = h.DB.Where("api_key IN (?)", plainAPIKeys).Order("created_at desc").Limit(limit).Offset((page - 1) * limit).Find(&queryRecords)
 	if result.Error != nil {
 		http.Error(w, "Failed to retrieve query records", http.StatusInternalServerError)
 		return
